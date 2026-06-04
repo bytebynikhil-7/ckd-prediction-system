@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,10 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — NephroScan" }] }),
   ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) throw redirect({ to: "/dashboard" });
-  },
   component: AuthPage,
 });
 
