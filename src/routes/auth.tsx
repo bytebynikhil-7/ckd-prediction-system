@@ -15,6 +15,12 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/dashboard" });
+    });
+  }, [navigate]);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4 py-10">
       <div className="w-full max-w-md">
