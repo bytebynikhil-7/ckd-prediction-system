@@ -71,8 +71,8 @@ function Dashboard() {
 
   const pieData = stats
     ? [
-        { name: "CKD detected", value: stats.ckd, color: "hsl(var(--destructive))" },
-        { name: "Normal", value: stats.notCkd, color: "hsl(var(--success))" },
+        { name: "CKD detected", value: stats.ckd, color: "var(--destructive)" },
+        { name: "Normal", value: stats.notCkd, color: "var(--success)" },
       ]
     : [];
 
@@ -107,7 +107,7 @@ function Dashboard() {
                 <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3}>
                   {pieData.map((d) => <Cell key={d.name} fill={d.color} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -116,13 +116,13 @@ function Dashboard() {
           <ChartCard title="By model" subtitle="Predictions per ML model">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={stats!.modelCounts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="model" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="model" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
                 <Legend />
-                <Bar dataKey="ckd" name="CKD" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="normal" name="Normal" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ckd" name="CKD" fill="var(--destructive)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="normal" name="Normal" fill="var(--success)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -130,13 +130,13 @@ function Dashboard() {
           <ChartCard title="Activity (last 14 days)" subtitle="Daily predictions trend" className="lg:col-span-2">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={stats!.trend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
                 <Legend />
-                <Line type="monotone" dataKey="predictions" name="Total" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="ckd" name="CKD" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="predictions" name="Total" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="ckd" name="CKD" stroke="var(--destructive)" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </ChartCard>
