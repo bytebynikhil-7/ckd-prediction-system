@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, Brain, History, TrendingUp, Stethoscope, ArrowRight } from "lucide-react";
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
+  LineChart, Line,
+} from "recharts";
+import { format, subDays, startOfDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
+import { MODELS, type ModelKey } from "@/lib/ckd";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — NephroScan" }] }),
@@ -24,9 +31,52 @@ function Dashboard() {
         .order("prediction_timestamp", { ascending: false });
       if (error) throw error;
       const ckd = rows.filter((r) => r.prediction_result === "ckd").length;
-      return { total: rows.length, ckd, notCkd: rows.length - ckd, recent: rows.slice(0, 5) };
+
+      const modelCounts = (Object.keys(MODELS) as ModelKey[]).map((m) => ({
+        model: MODELS[m].name,
+        ckd: rows.filter((r) => r.selected_model === m && r.prediction_result === "ckd").length,
+        normal: rows.filter((r) => r.selected_model === m && r.prediction_result !== "ckd").length,
+      }));
+
+      const today = startOfDay(new Date());
+      const trend = Array.from({ length: 14 }, (_, i) => {
+        const day = startOfDay(subDays(today, 13 - i));
+        const next = startOfDay(subDays(today, 12 - i));
+        const dayRows = rows.filter((r) => {
+          const t = new Date(r.prediction_timestamp).getTime();
+          return t >= day.getTime() && t < next.getTime();
+        });
+        return {
+          date: format(day, "MMM d"),
+          predictions: dayRows.length,
+          ckd: dayRows.filter((r) => r.prediction_result === "ckd").length,
+        };
+      });
+
+      const avgConf = rows.length
+        ? Math.round(rows.reduce((s, r) => s + Number(r.confidence_score), 0) / rows.length)
+        : 0;
+
+      return {
+        total: rows.length,
+        ckd,
+        notCkd: rows.length - ckd,
+        avgConf,
+        recent: rows.slice(0, 5),
+        modelCounts,
+        trend,
+      };
     },
   });
+
+  const pieData = stats
+    ? [
+        { name: "CKD detected", value: stats.ckd, color: "var(--destructive)" },
+        { name: "Normal", value: stats.notCkd, color: "var(--success)" },
+      ]
+    : [];
+
+  const hasData = (stats?.total ?? 0) > 0;
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
@@ -46,12 +96,52 @@ function Dashboard() {
         <StatCard icon={History} label="Total predictions" value={stats?.total ?? 0} />
         <StatCard icon={TrendingUp} label="CKD detected" value={stats?.ckd ?? 0} tone="danger" />
         <StatCard icon={Stethoscope} label="Not detected" value={stats?.notCkd ?? 0} tone="success" />
-        <StatCard
-          icon={Brain}
-          label="Detection rate"
-          value={stats && stats.total ? `${Math.round((stats.ckd / stats.total) * 100)}%` : "—"}
-        />
+        <StatCard icon={Brain} label="Avg confidence" value={stats ? `${stats.avgConf}%` : "—"} />
       </div>
+
+      {hasData && (
+        <div className="grid lg:grid-cols-2 gap-4">
+          <ChartCard title="Outcome distribution" subtitle="CKD vs Normal across all predictions">
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3}>
+                  {pieData.map((d) => <Cell key={d.name} fill={d.color} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="By model" subtitle="Predictions per ML model">
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={stats!.modelCounts}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="model" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                <Legend />
+                <Bar dataKey="ckd" name="CKD" fill="var(--destructive)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="normal" name="Normal" fill="var(--success)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Activity (last 14 days)" subtitle="Daily predictions trend" className="lg:col-span-2">
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={stats!.trend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                <Legend />
+                <Line type="monotone" dataKey="predictions" name="Total" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="ckd" name="CKD" stroke="var(--destructive)" strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+      )}
 
       <section className="rounded-xl border bg-card shadow-card">
         <div className="p-5 border-b flex items-center justify-between">
@@ -67,7 +157,12 @@ function Dashboard() {
             </div>
           )}
           {stats?.recent?.map((r) => (
-            <div key={r.id} className="p-4 flex items-center justify-between gap-4">
+            <Link
+              key={r.id}
+              to="/results"
+              search={{ id: r.id }}
+              className="p-4 flex items-center justify-between gap-4 hover:bg-accent/30 transition-colors"
+            >
               <div className="flex items-center gap-3 min-w-0">
                 <span
                   className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -87,10 +182,23 @@ function Dashboard() {
                   </div>
                 </div>
               </div>
-            </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </Link>
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+function ChartCard({ title, subtitle, children, className }: { title: string; subtitle?: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`rounded-xl border bg-card shadow-card p-5 ${className ?? ""}`}>
+      <div className="mb-3">
+        <h3 className="font-semibold">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      </div>
+      {children}
     </div>
   );
 }
