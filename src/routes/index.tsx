@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Activity, ShieldCheck, Stethoscope, HeartPulse, LineChart, Brain, ArrowRight } from "lucide-react";
+import { Activity, ShieldCheck, HeartPulse, LineChart, Brain, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PublicHeader } from "@/components/PublicHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,21 +18,8 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      <header className="border-b bg-card/70 backdrop-blur sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center shadow-elegant">
-              <Stethoscope className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-semibold text-lg">NephroScan</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link to="/auth"><Button variant="ghost">Sign in</Button></Link>
-            <Link to="/auth"><Button>Get started</Button></Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-subtle flex flex-col">
+      <PublicHeader />
 
       <section className="container mx-auto px-4 py-20 md:py-28">
         <div className="max-w-3xl mx-auto text-center">
@@ -50,26 +39,27 @@ function Landing() {
                 Start Prediction <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <a href="#about"><Button size="lg" variant="outline">Learn more</Button></a>
+            <Link to="/about-project"><Button size="lg" variant="outline">Learn more</Button></Link>
           </div>
           <p className="mt-4 text-xs text-muted-foreground">For screening and educational purposes only — not a medical diagnosis.</p>
         </div>
       </section>
 
-      <section id="about" className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { icon: HeartPulse, title: "What is CKD?", body: "Chronic Kidney Disease is the gradual loss of kidney function. Over 850 million people are affected worldwide, often without knowing." },
-            { icon: ShieldCheck, title: "Why early detection?", body: "Early-stage CKD has no symptoms but can be slowed dramatically with intervention. Screening saves lives and treatment cost." },
-            { icon: Brain, title: "How NephroScan helps", body: "Three trained ML models score risk from routine lab values — a fast first-line screening before specialist referral." },
+            { icon: HeartPulse, title: "What is CKD?", body: "Chronic Kidney Disease is the gradual loss of kidney function. Over 850 million people are affected worldwide, often without knowing.", to: "/about-ckd" },
+            { icon: ShieldCheck, title: "Why early detection?", body: "Early-stage CKD has no symptoms but can be slowed dramatically with intervention. Screening saves lives and treatment cost.", to: "/about-ckd" },
+            { icon: Brain, title: "How NephroScan helps", body: "Three trained ML models score risk from routine lab values — a fast first-line screening before specialist referral.", to: "/models" },
           ].map((c) => (
-            <div key={c.title} className="rounded-xl border bg-card p-6 shadow-card">
+            <Link key={c.title} to={c.to} className="rounded-xl border bg-card p-6 shadow-card hover:shadow-elegant transition-shadow">
               <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center mb-4">
                 <c.icon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="font-semibold text-lg mb-2">{c.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{c.body}</p>
-            </div>
+              <div className="text-sm text-primary mt-3 inline-flex items-center gap-1">Learn more <ArrowRight className="w-3.5 h-3.5" /></div>
+            </Link>
           ))}
         </div>
       </section>
@@ -90,15 +80,13 @@ function Landing() {
               </li>
             ))}
           </ul>
+          <div className="mt-6">
+            <Link to="/about-project"><Button variant="secondary" size="lg">Read project details</Button></Link>
+          </div>
         </div>
       </section>
 
-      <footer className="border-t bg-card mt-10">
-        <div className="container mx-auto px-4 py-8 text-sm text-muted-foreground flex flex-col md:flex-row justify-between gap-2">
-          <div>© {new Date().getFullYear()} NephroScan. Educational use only.</div>
-          <div>Not a substitute for professional medical advice.</div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
