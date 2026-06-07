@@ -8,6 +8,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const POST_CONFIRMATION_ROUTE = "/dashboard";
+
+function getAuthRedirectUrl() {
+  const configuredOrigin = import.meta.env.VITE_PUBLIC_APP_URL || import.meta.env.VITE_APP_URL;
+  const appOrigin = configuredOrigin ? configuredOrigin.replace(/\/$/, "") : window.location.origin;
+  return `${appOrigin}/auth`;
+}
+
+function readAuthCallbackError() {
+  const url = new URL(window.location.href);
+  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+  return url.searchParams.get("error_description") || hashParams.get("error_description");
+}
+
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — NephroScan" }] }),
   ssr: false,
@@ -17,9 +31,38 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
-    });
+    let cancelled = false;
+
+    async function completeAuthCallback() {
+      const callbackError = readAuthCallbackError();
+      if (callbackError) {
+        toast.error(callbackError.replace(/\+/g, " "));
+        window.history.replaceState({}, document.title, "/auth");
+        return;
+      }
+
+      const code = new URLSearchParams(window.location.search).get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+        if (error) {
+          toast.error(error.message);
+          window.history.replaceState({}, document.title, "/auth");
+          return;
+        }
+        toast.success("Email verified");
+        navigate({ to: POST_CONFIRMATION_ROUTE, replace: true });
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled && data.session) navigate({ to: POST_CONFIRMATION_ROUTE, replace: true });
+    }
+
+    completeAuthCallback();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4 py-10">
@@ -90,7 +133,7 @@ function SignUp() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: getAuthRedirectUrl(),
         data: { full_name: fullName },
       },
     });
