@@ -313,6 +313,7 @@ function PredictPage() {
                 setForm({ ...form, red_blood_cell_count: v })
               }
               band={rbcBand(form.red_blood_cell_count)}
+              valueLabel={`${form.red_blood_cell_count.toFixed(1)} M/cmm`}
             />
           </ParameterCard>
 
