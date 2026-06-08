@@ -15,6 +15,8 @@ import {
   Apple,
   Microscope,
   Gauge,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -255,6 +257,7 @@ function PredictPage() {
               normalLabel="Normal: 1.015 – 1.025"
               onChange={(v) => setForm({ ...form, specific_gravity: v })}
               band={sgBand(form.specific_gravity)}
+              valueLabel={form.specific_gravity.toFixed(3)}
             />
           </ParameterCard>
 
@@ -281,6 +284,7 @@ function PredictPage() {
               normalLabel="Normal: ≥ 12 g/dL"
               onChange={(v) => setForm({ ...form, hemoglobin: v })}
               band={hemoBand(form.hemoglobin)}
+              valueLabel={`${form.hemoglobin.toFixed(1)} g/dL`}
             />
           </ParameterCard>
 
@@ -309,6 +313,7 @@ function PredictPage() {
                 setForm({ ...form, red_blood_cell_count: v })
               }
               band={rbcBand(form.red_blood_cell_count)}
+              valueLabel={`${form.red_blood_cell_count.toFixed(1)} M/cmm`}
             />
           </ParameterCard>
 
@@ -577,6 +582,7 @@ function RiskSlider({
   normalLabel,
   band,
   onChange,
+  valueLabel,
 }: {
   value: number;
   min: number;
@@ -585,9 +591,63 @@ function RiskSlider({
   normalLabel: string;
   band: RiskBand;
   onChange: (v: number) => void;
+  valueLabel: string;
 }) {
+  const atMin = value <= min;
+  const atMax = value >= max;
+
+  const decrease = () => {
+    const next = Math.round((value - step) / step) * step;
+    onChange(Math.max(min, parseFloat(next.toFixed(10))));
+  };
+
+  const increase = () => {
+    const next = Math.round((value + step) / step) * step;
+    onChange(Math.min(max, parseFloat(next.toFixed(10))));
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={decrease}
+          disabled={atMin}
+          aria-label="Decrease value"
+          className={cn(
+            "h-10 w-10 shrink-0 rounded-full border flex items-center justify-center transition-all",
+            "hover:bg-accent hover:border-primary/40 active:scale-95",
+            atMin
+              ? "opacity-40 cursor-not-allowed border-muted"
+              : "border-input bg-background shadow-sm cursor-pointer",
+          )}
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+
+        <div className="flex-1 text-center">
+          <div className="text-xl md:text-2xl font-bold tabular-nums tracking-tight">
+            {valueLabel}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={increase}
+          disabled={atMax}
+          aria-label="Increase value"
+          className={cn(
+            "h-10 w-10 shrink-0 rounded-full border flex items-center justify-center transition-all",
+            "hover:bg-accent hover:border-primary/40 active:scale-95",
+            atMax
+              ? "opacity-40 cursor-not-allowed border-muted"
+              : "border-input bg-background shadow-sm cursor-pointer",
+          )}
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+
       <Slider
         value={[value]}
         min={min}
@@ -596,10 +656,12 @@ function RiskSlider({
         onValueChange={(v) => onChange(v[0])}
         className="py-2"
       />
+
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>Min {min}</span>
         <span>Max {max}</span>
       </div>
+
       <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
         <span className="text-xs text-muted-foreground">{normalLabel}</span>
         <div className="flex items-center gap-3 text-[11px]">
