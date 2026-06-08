@@ -30,7 +30,7 @@ function Landing() {
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
             Detect <span className="bg-gradient-primary bg-clip-text text-transparent">Chronic Kidney Disease</span> early.
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground font-mono">
+          <p className="mt-6 text-lg text-muted-foreground font-sans">
             AI-powered kidney health screening built to support early detection, awareness, and timely clinical intervention.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
