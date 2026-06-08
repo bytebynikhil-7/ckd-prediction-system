@@ -3,6 +3,7 @@ import { Activity, ShieldCheck, HeartPulse, LineChart, Brain, ArrowRight } from 
 import { Button } from "@/components/ui/button";
 import { PublicHeader } from "@/components/PublicHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import kidneyHero from "@/assets/kidney-hero.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
