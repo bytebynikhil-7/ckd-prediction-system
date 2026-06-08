@@ -72,9 +72,7 @@ function ResultsPage() {
               {isCKD ? "CKD Detected" : "CKD Not Detected"}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {isCKD
-                ? "Indicators suggest possible chronic kidney disease. Please consult a nephrologist for confirmation."
-                : "No strong indicators of chronic kidney disease detected based on the inputs provided."}
+              {getRiskExplanation(result, risk)}
             </p>
           </div>
         </div>
