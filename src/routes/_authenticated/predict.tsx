@@ -257,6 +257,7 @@ function PredictPage() {
               normalLabel="Normal: 1.015 – 1.025"
               onChange={(v) => setForm({ ...form, specific_gravity: v })}
               band={sgBand(form.specific_gravity)}
+              valueLabel={form.specific_gravity.toFixed(3)}
             />
           </ParameterCard>
 
