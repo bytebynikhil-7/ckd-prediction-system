@@ -284,6 +284,7 @@ function PredictPage() {
               normalLabel="Normal: ≥ 12 g/dL"
               onChange={(v) => setForm({ ...form, hemoglobin: v })}
               band={hemoBand(form.hemoglobin)}
+              valueLabel={`${form.hemoglobin.toFixed(1)} g/dL`}
             />
           </ParameterCard>
 
