@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { MODELS, type ModelKey } from "@/lib/ckd";
 import { cn } from "@/lib/utils";
-import { deriveRisk, getRecommendations, RISK_STYLES } from "@/lib/recommendations";
+import { deriveRisk, getRecommendations, RISK_STYLES, getRiskExplanation, type RiskLevel } from "@/lib/recommendations";
 
 export const Route = createFileRoute("/_authenticated/results")({
   head: () => ({ meta: [{ title: "Prediction result — NephroScan" }] }),
@@ -72,9 +72,7 @@ function ResultsPage() {
               {isCKD ? "CKD Detected" : "CKD Not Detected"}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {isCKD
-                ? "Indicators suggest possible chronic kidney disease. Please consult a nephrologist for confirmation."
-                : "No strong indicators of chronic kidney disease detected based on the inputs provided."}
+              {getRiskExplanation(result, risk)}
             </p>
           </div>
         </div>
@@ -99,7 +97,7 @@ function ResultsPage() {
             <div
               className="relative h-full bg-foreground/80 w-1"
               style={{
-                marginLeft: `${risk === "low" ? 15 : risk === "moderate" ? 50 : 85}%`,
+                marginLeft: `${risk === "low" ? 15 : risk === "borderline" ? 35 : risk === "moderate" ? 65 : risk === "high" ? 85 : 50}%`,
               }}
             />
           </div>
@@ -173,7 +171,7 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-function RiskMetric({ risk }: { risk: "low" | "moderate" | "high" }) {
+function RiskMetric({ risk }: { risk: RiskLevel }) {
   const s = RISK_STYLES[risk];
   return (
     <div className={cn("rounded-lg border p-4 ring-1", s.bg, s.ring)}>
