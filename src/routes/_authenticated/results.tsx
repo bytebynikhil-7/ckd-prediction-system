@@ -97,7 +97,7 @@ function ResultsPage() {
             <div
               className="relative h-full bg-foreground/80 w-1"
               style={{
-                marginLeft: `${risk === "low" ? 15 : risk === "moderate" ? 50 : 85}%`,
+                marginLeft: `${risk === "low" ? 15 : risk === "borderline" ? 35 : risk === "moderate" ? 65 : risk === "high" ? 85 : 50}%`,
               }}
             />
           </div>
