@@ -7,9 +7,9 @@ export const Route = createFileRoute("/about-project")({
   head: () => ({
     meta: [
       { title: "About the Project — NephroScan" },
-      { name: "description", content: "How NephroScan was built — objectives, dataset, machine learning approach, architecture, and ethical considerations." },
+      { name: "description", content: "Learn about NephroScan's mission — early CKD awareness, AI-assisted screening benefits, and ethical considerations." },
       { property: "og:title", content: "About the NephroScan Project" },
-      { property: "og:description", content: "Objectives, dataset, ML approach, and architecture behind NephroScan." },
+      { property: "og:description", content: "NephroScan's mission, benefits, and ethical approach to early CKD screening." },
     ],
   }),
   component: AboutProject,
