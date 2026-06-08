@@ -15,6 +15,8 @@ import {
   Apple,
   Microscope,
   Gauge,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
