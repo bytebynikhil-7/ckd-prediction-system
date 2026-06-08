@@ -1,11 +1,14 @@
-import { Link } from "@tanstack/react-router";
-import { Stethoscope, Menu } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Stethoscope, Menu, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const links = [
   { to: "/about-ckd", label: "About CKD" },
@@ -16,6 +19,17 @@ const links = [
 ] as const;
 
 export function PublicHeader() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  const signOut = async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/", replace: true });
+  };
+
   return (
     <header className="border-b bg-card/70 backdrop-blur sticky top-0 z-30">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -40,8 +54,23 @@ export function PublicHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
-          <Link to="/auth"><Button variant="ghost">Sign in</Button></Link>
-          <Link to="/auth"><Button>Get started</Button></Link>
+          {loading ? null : user ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost">
+                  <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                </Button>
+              </Link>
+              <Button onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" /> Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth"><Button variant="ghost">Sign in</Button></Link>
+              <Link to="/auth"><Button>Get started</Button></Link>
+            </>
+          )}
         </div>
 
         <Sheet>
@@ -56,8 +85,17 @@ export function PublicHeader() {
                 </Link>
               ))}
               <div className="h-px bg-border my-3" />
-              <Link to="/auth" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">Sign in</Link>
-              <Link to="/auth" className="px-3 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90">Get started</Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">Dashboard</Link>
+                  <button onClick={signOut} className="text-left px-3 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90">Sign out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">Sign in</Link>
+                  <Link to="/auth" className="px-3 py-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:opacity-90">Get started</Link>
+                </>
+              )}
             </nav>
           </SheetContent>
         </Sheet>
