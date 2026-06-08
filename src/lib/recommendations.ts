@@ -1,10 +1,34 @@
 import type { PredictionInput } from "./ckd";
 
-export type RiskLevel = "low" | "moderate" | "high";
+export type RiskLevel = "low" | "borderline" | "moderate" | "high" | "uncertain";
 
 export function deriveRisk(result: "ckd" | "not_ckd", confidence: number): RiskLevel {
-  if (result === "ckd") return confidence > 80 ? "high" : "moderate";
-  return confidence > 80 ? "low" : "moderate";
+  if (result === "ckd") {
+    if (confidence >= 70) return "high";
+    if (confidence >= 50) return "moderate";
+    return "uncertain";
+  }
+  // result === "not_ckd"
+  if (confidence >= 70) return "low";
+  if (confidence >= 50) return "borderline";
+  return "uncertain";
+}
+
+export function getRiskExplanation(result: "ckd" | "not_ckd", risk: RiskLevel): string {
+  if (risk === "uncertain") {
+    return "The result is uncertain due to low confidence. Please consult a healthcare professional for further evaluation.";
+  }
+  if (result === "ckd") {
+    if (risk === "high") {
+      return "Indicators strongly suggest chronic kidney disease. Please consult a nephrologist promptly for confirmation.";
+    }
+    return "Indicators suggest possible chronic kidney disease. Please consult a nephrologist for confirmation.";
+  }
+  // not_ckd
+  if (risk === "borderline") {
+    return "No strong indicators of chronic kidney disease were detected, but some clinical values are near risk thresholds. Consider routine monitoring.";
+  }
+  return "No strong indicators of chronic kidney disease were detected.";
 }
 
 export interface Recommendation {
@@ -19,13 +43,20 @@ export function getRecommendations(
 ): Recommendation[] {
   const recs: Recommendation[] = [];
 
-  if (result === "ckd" || risk !== "low") {
+  if (risk === "high" || risk === "moderate") {
     recs.push({
       title: "Consult a nephrologist",
       detail:
         "Book an appointment with a kidney specialist for confirmatory testing (eGFR, creatinine, ACR). Bring this report and any recent lab results.",
     });
+  } else if (risk === "uncertain") {
+    recs.push({
+      title: "Repeat screening or consult a clinician",
+      detail:
+        "Low confidence in this result suggests rechecking inputs or scheduling a clinical evaluation for more reliable assessment.",
+    });
   } else {
+    // low or borderline
     recs.push({
       title: "Maintain annual kidney check-ups",
       detail:
@@ -94,6 +125,8 @@ export function getRecommendations(
 
 export const RISK_STYLES: Record<RiskLevel, { label: string; color: string; bg: string; ring: string }> = {
   low: { label: "Low Risk", color: "text-success", bg: "bg-success/10", ring: "ring-success/30" },
+  borderline: { label: "Borderline Risk", color: "text-warning", bg: "bg-warning/10", ring: "ring-warning/30" },
   moderate: { label: "Moderate Risk", color: "text-warning", bg: "bg-warning/10", ring: "ring-warning/30" },
   high: { label: "High Risk", color: "text-destructive", bg: "bg-destructive/10", ring: "ring-destructive/30" },
+  uncertain: { label: "Uncertain Result", color: "text-primary", bg: "bg-primary/10", ring: "ring-primary/30" },
 };
