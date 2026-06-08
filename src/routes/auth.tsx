@@ -16,6 +16,10 @@ function getAuthRedirectUrl() {
   return `${appOrigin}/auth`;
 }
 
+function logAuthRedirectUrl(redirectUrl: string) {
+  console.info("Supabase email confirmation redirect URL:", redirectUrl);
+}
+
 function readAuthCallbackError() {
   const url = new URL(window.location.href);
   const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
@@ -129,11 +133,13 @@ function SignUp() {
     e.preventDefault();
     if (password.length < 6) return toast.error("Password must be at least 6 characters");
     setLoading(true);
+    const emailRedirectTo = getAuthRedirectUrl();
+    logAuthRedirectUrl(emailRedirectTo);
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: getAuthRedirectUrl(),
+        emailRedirectTo,
         data: { full_name: fullName },
       },
     });
