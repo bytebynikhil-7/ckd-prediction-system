@@ -22,13 +22,28 @@ function AdminPage() {
   const { data } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [{ count: userCount }, { data: predictions }] = await Promise.all([
+      const [{ count: userCount }, { data: predictions }, { data: profiles }, { data: roles }] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("prediction_history").select("*"),
+        supabase.from("prediction_history").select("*").order("prediction_timestamp", { ascending: false }),
+        supabase.from("profiles").select("id, full_name, email, created_at").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
       ]);
-      return { userCount: userCount ?? 0, predictions: predictions ?? [] };
+      return {
+        userCount: userCount ?? 0,
+        predictions: predictions ?? [],
+        profiles: profiles ?? [],
+        roles: roles ?? [],
+      };
     },
   });
+
+  const profilesById = new Map((data?.profiles ?? []).map((p) => [p.id, p]));
+  const rolesByUser = new Map<string, string>();
+  for (const r of data?.roles ?? []) {
+    // prefer admin if multiple
+    if (r.role === "admin" || !rolesByUser.has(r.user_id)) rolesByUser.set(r.user_id, r.role);
+  }
+
 
   const preds = data?.predictions ?? [];
   const ckdCount = preds.filter((p) => p.prediction_result === "ckd").length;
