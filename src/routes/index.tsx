@@ -23,26 +23,47 @@ function Landing() {
       <PublicHeader />
 
       <section className="container mx-auto px-4 py-20 md:py-28">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-medium mb-6">
-            <HeartPulse className="w-3.5 h-3.5" />
-            ML-powered clinical screening tool
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-medium mb-6">
+              <HeartPulse className="w-3.5 h-3.5" />
+              ML-powered clinical screening tool
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
+              Detect <span className="bg-gradient-primary bg-clip-text text-transparent">Chronic Kidney Disease</span> early.
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground font-sans">
+              AI-powered kidney health screening built to support early detection, awareness, and timely clinical intervention.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+              <Link to="/auth">
+                <Button size="lg" className="shadow-elegant">
+                  Start Prediction <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/about-project"><Button size="lg" variant="outline">Learn more</Button></Link>
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">For screening and educational purposes only — not a medical diagnosis.</p>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
-            Detect <span className="bg-gradient-primary bg-clip-text text-transparent">Chronic Kidney Disease</span> early.
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground font-sans">
-            AI-powered kidney health screening built to support early detection, awareness, and timely clinical intervention.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/auth">
-              <Button size="lg" className="shadow-elegant">
-                Start Prediction <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/about-project"><Button size="lg" variant="outline">Learn more</Button></Link>
+
+          <div className="relative flex items-center justify-center order-first lg:order-last">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 m-auto w-[70%] aspect-square rounded-full bg-gradient-primary opacity-20 blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 m-auto w-[60%] aspect-square rounded-full bg-primary/10 blur-2xl"
+            />
+            <img
+              src={kidneyHero}
+              alt="3D anatomical illustration of a healthy human kidney"
+              width={1024}
+              height={1024}
+              fetchPriority="high"
+              className="relative w-64 sm:w-80 md:w-96 lg:w-[460px] h-auto drop-shadow-[0_25px_45px_rgba(37,99,235,0.25)] animate-kidney-float"
+            />
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">For screening and educational purposes only — not a medical diagnosis.</p>
         </div>
       </section>
 
