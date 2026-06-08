@@ -171,7 +171,7 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-function RiskMetric({ risk }: { risk: "low" | "moderate" | "high" }) {
+function RiskMetric({ risk }: { risk: RiskLevel }) {
   const s = RISK_STYLES[risk];
   return (
     <div className={cn("rounded-lg border p-4 ring-1", s.bg, s.ring)}>
