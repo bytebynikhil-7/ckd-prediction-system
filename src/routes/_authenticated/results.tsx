@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { MODELS, type ModelKey } from "@/lib/ckd";
 import { cn } from "@/lib/utils";
-import { deriveRisk, getRecommendations, RISK_STYLES } from "@/lib/recommendations";
+import { deriveRisk, getRecommendations, RISK_STYLES, getRiskExplanation, type RiskLevel } from "@/lib/recommendations";
 
 export const Route = createFileRoute("/_authenticated/results")({
   head: () => ({ meta: [{ title: "Prediction result — NephroScan" }] }),
