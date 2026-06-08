@@ -22,13 +22,28 @@ function AdminPage() {
   const { data } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [{ count: userCount }, { data: predictions }] = await Promise.all([
+      const [{ count: userCount }, { data: predictions }, { data: profiles }, { data: roles }] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("prediction_history").select("*"),
+        supabase.from("prediction_history").select("*").order("prediction_timestamp", { ascending: false }),
+        supabase.from("profiles").select("id, full_name, email, created_at").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
       ]);
-      return { userCount: userCount ?? 0, predictions: predictions ?? [] };
+      return {
+        userCount: userCount ?? 0,
+        predictions: predictions ?? [],
+        profiles: profiles ?? [],
+        roles: roles ?? [],
+      };
     },
   });
+
+  const profilesById = new Map((data?.profiles ?? []).map((p) => [p.id, p]));
+  const rolesByUser = new Map<string, string>();
+  for (const r of data?.roles ?? []) {
+    // prefer admin if multiple
+    if (r.role === "admin" || !rolesByUser.has(r.user_id)) rolesByUser.set(r.user_id, r.role);
+  }
+
 
   const preds = data?.predictions ?? [];
   const ckdCount = preds.filter((p) => p.prediction_result === "ckd").length;
@@ -101,26 +116,84 @@ function AdminPage() {
           </ResponsiveContainer>
         </Card>
 
-        <Card title="Recent system activity">
-          <div className="divide-y max-h-[260px] overflow-y-auto">
-            {preds.slice(0, 15).map((p) => (
-              <div key={p.id} className="py-2 flex items-center justify-between text-sm">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  p.prediction_result === "ckd" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"
-                }`}>
-                  {p.prediction_result === "ckd" ? "CKD" : "Normal"}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {MODELS[p.selected_model as ModelKey].name} · {p.confidence_score}%
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(p.prediction_timestamp).toLocaleString()}
-                </span>
-              </div>
-            ))}
-            {!preds.length && <div className="py-10 text-center text-sm text-muted-foreground">No activity yet</div>}
+        <Card title="Recent users">
+          <div className="overflow-x-auto -mx-5 px-5">
+            <table className="w-full text-sm min-w-[480px]">
+              <thead className="text-xs text-muted-foreground border-b">
+                <tr>
+                  <th className="text-left font-medium py-2 pr-3">Name</th>
+                  <th className="text-left font-medium py-2 pr-3">Email</th>
+                  <th className="text-left font-medium py-2 pr-3">Registered</th>
+                  <th className="text-left font-medium py-2">Role</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {(data?.profiles ?? []).slice(0, 10).map((u) => {
+                  const role = rolesByUser.get(u.id) ?? "user";
+                  return (
+                    <tr key={u.id}>
+                      <td className="py-2 pr-3 font-medium truncate max-w-[140px]">{u.full_name || "—"}</td>
+                      <td className="py-2 pr-3 text-muted-foreground truncate max-w-[180px]">{u.email}</td>
+                      <td className="py-2 pr-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          role === "admin" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                        }`}>
+                          {role === "admin" ? "Admin" : "User"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {!data?.profiles?.length && <div className="py-10 text-center text-sm text-muted-foreground">No users yet</div>}
           </div>
         </Card>
+      </div>
+
+      <div className="rounded-xl border bg-card shadow-card p-5">
+        <h2 className="font-semibold mb-4">Recent predictions</h2>
+        <div className="overflow-x-auto -mx-5 px-5 max-h-[420px] overflow-y-auto">
+          <table className="w-full text-sm min-w-[720px]">
+            <thead className="text-xs text-muted-foreground border-b sticky top-0 bg-card">
+              <tr>
+                <th className="text-left font-medium py-2 pr-3">User</th>
+                <th className="text-left font-medium py-2 pr-3">Email</th>
+                <th className="text-left font-medium py-2 pr-3">Model</th>
+                <th className="text-left font-medium py-2 pr-3">Result</th>
+                <th className="text-left font-medium py-2 pr-3">Confidence</th>
+                <th className="text-left font-medium py-2">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {preds.slice(0, 25).map((p) => {
+                const u = profilesById.get(p.user_id);
+                return (
+                  <tr key={p.id}>
+                    <td className="py-2 pr-3 font-medium truncate max-w-[140px]">{u?.full_name || "—"}</td>
+                    <td className="py-2 pr-3 text-muted-foreground truncate max-w-[180px]">{u?.email || "—"}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">{MODELS[p.selected_model as ModelKey].name}</td>
+                    <td className="py-2 pr-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        p.prediction_result === "ckd" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"
+                      }`}>
+                        {p.prediction_result === "ckd" ? "CKD" : "Not CKD"}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-3">{p.confidence_score}%</td>
+                    <td className="py-2 text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(p.prediction_timestamp).toLocaleString()}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!preds.length && <div className="py-10 text-center text-sm text-muted-foreground">No predictions yet</div>}
+        </div>
       </div>
     </div>
   );

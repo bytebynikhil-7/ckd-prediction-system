@@ -21,6 +21,25 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const { user } = useAuth();
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const displayName =
+    profile?.full_name?.trim() ||
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name?.trim() ||
+    user?.email?.split("@")[0] ||
+    "there";
+
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats", user?.id],
     enabled: !!user,
@@ -82,7 +101,7 @@ function Dashboard() {
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {displayName} 👋</h1>
           <p className="text-muted-foreground mt-1">{user?.email}</p>
         </div>
         <Link to="/predict">
