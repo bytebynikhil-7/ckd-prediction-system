@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Target, Layers, Database, Shield, Brain, Workflow } from "lucide-react";
+import { Target, Database, Shield, Brain, Workflow, Eye, Sparkles, Clock, Heart, FileText, Stethoscope } from "lucide-react";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Button } from "@/components/ui/button";
 
