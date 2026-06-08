@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Target, Layers, Database, Shield, Brain, Workflow } from "lucide-react";
+import { Target, Database, Shield, Brain, Workflow, Eye, Sparkles, Clock, Heart, FileText, Stethoscope } from "lucide-react";
 import { PublicLayout } from "@/components/PublicLayout";
 import { Button } from "@/components/ui/button";
 
@@ -7,9 +7,9 @@ export const Route = createFileRoute("/about-project")({
   head: () => ({
     meta: [
       { title: "About the Project — NephroScan" },
-      { name: "description", content: "How NephroScan was built — objectives, dataset, machine learning approach, architecture, and ethical considerations." },
+      { name: "description", content: "Learn about NephroScan's mission — early CKD awareness, AI-assisted screening benefits, and ethical considerations." },
       { property: "og:title", content: "About the NephroScan Project" },
-      { property: "og:description", content: "Objectives, dataset, ML approach, and architecture behind NephroScan." },
+      { property: "og:description", content: "NephroScan's mission, benefits, and ethical approach to early CKD screening." },
     ],
   }),
   component: AboutProject,
@@ -42,16 +42,36 @@ function AboutProject() {
           </Box>
         </div>
 
-        <h2 className="text-2xl font-bold mt-12">Architecture</h2>
-        <div className="mt-4 rounded-xl border bg-card p-6 shadow-card text-sm">
-          <Layers className="w-5 h-5 text-primary mb-2" />
-          <ul className="space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Frontend:</strong> React 19 + TanStack Start with TypeScript and Tailwind CSS.</li>
-            <li><strong className="text-foreground">Backend:</strong> Server functions secured with authenticated middleware.</li>
-            <li><strong className="text-foreground">Database:</strong> PostgreSQL with row-level security for per-user isolation.</li>
-            <li><strong className="text-foreground">ML layer:</strong> Clinical scoring engine ready to be swapped with a FastAPI service hosting the trained models.</li>
-            <li><strong className="text-foreground">Auth:</strong> Email/password authentication with role-based admin access.</li>
-          </ul>
+        <h2 className="text-2xl font-bold mt-12">Why NephroScan?</h2>
+        <p className="mt-4 text-muted-foreground">
+          NephroScan is designed to support early awareness of Chronic Kidney Disease (CKD) through AI-assisted risk screening.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-4 mt-6">
+          <Box icon={Eye} title="Early identification">
+            Identify potential kidney health risks before symptoms become severe, enabling timely awareness and action.
+          </Box>
+          <Box icon={Sparkles} title="Simple & easy to use">
+            A clean, guided screening process that anyone can complete without technical or medical expertise.
+          </Box>
+          <Box icon={Clock} title="Fast prediction results">
+            Get immediate AI-assisted risk assessments based on routine clinical parameters.
+          </Box>
+          <Box icon={Heart} title="Supports preventive care">
+            Promotes healthcare awareness and helps users take proactive steps toward kidney health.
+          </Box>
+          <Box icon={FileText} title="Downloadable reports">
+            Save and share structured prediction reports for personal records or future medical consultations.
+          </Box>
+          <Box icon={Stethoscope} title="Informed consultation">
+            Helps users understand when seeking professional medical advice may be beneficial.
+          </Box>
+        </div>
+
+        <div className="mt-6 rounded-xl border bg-accent/40 p-6 text-sm">
+          <p className="text-muted-foreground">
+            <strong className="text-foreground">Important note:</strong> NephroScan is an educational and screening tool only. It does not replace professional medical diagnosis or treatment.
+          </p>
         </div>
 
         <h2 className="text-2xl font-bold mt-12">Ethical considerations</h2>
