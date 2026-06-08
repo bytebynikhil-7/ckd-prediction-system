@@ -40,8 +40,8 @@ export function SiteFooter() {
         <div>
           <div className="text-sm font-semibold mb-3">Connect</div>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> nephroscan@example.com</li>
-            <li className="flex items-center gap-2"><Github className="w-4 h-4" /> github.com/nephroscan</li>
+            <li className="flex items-center gap-2"><Mail className="w-4 h-4" /><a href="mailto:nikhilmudhiraj.ch@gmail.com" className="hover:text-foreground">nikhilmudhiraj.ch@gmail.com</a></li>
+            <li className="flex items-center gap-2"><Github className="w-4 h-4" /><a href="https://github.com/bytebynikhil-7" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">github.com/bytebynikhil-7</a></li>
             <li className="flex items-center gap-2"><HeartPulse className="w-4 h-4" /> Built for healthcare research</li>
           </ul>
         </div>
